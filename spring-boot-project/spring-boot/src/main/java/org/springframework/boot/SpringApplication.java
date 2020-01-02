@@ -269,7 +269,18 @@ public class SpringApplication {
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
+		 /**
+		 * 设置List<ApplicationContextInitializer<?>> initializers ，读取 META-
+         * INF/spring.factories 路径下 属性名为
+		 * org.springframework.context.ApplicationContextInitializer的属性值，转换为类实例
+         * 的集合
+		  **/
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
+		/**
+		 * 设置private List<ApplicationListener<?>> listeners; ，读取 META-
+		 * INF/spring.factories 路径下 属性名为
+		 * org.springframework.context.ApplicationListener的属性值，转换为类实例的集合
+		 */
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
@@ -296,10 +307,12 @@ public class SpringApplication {
 	 * @return a running {@link ApplicationContext}
 	 */
 	public ConfigurableApplicationContext run(String... args) {
+		//StopWatch 操作耗时的日志打印类
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		ConfigurableApplicationContext context = null;
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+		//设置系统属性 java.awt.headless 为 true
 		configureHeadlessProperty();
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
