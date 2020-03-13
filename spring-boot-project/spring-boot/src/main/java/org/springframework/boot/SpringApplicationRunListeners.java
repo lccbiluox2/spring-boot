@@ -67,6 +67,7 @@ class SpringApplicationRunListeners {
 	}
 
 	void started(ConfigurableApplicationContext context) {
+		// 得到所有的 SpringAppLicationRunListener,其实就是一个EventPublishingRunListener,然后依次调用starting方法
 		for (SpringApplicationRunListener listener : this.listeners) {
 			listener.started(context);
 		}
