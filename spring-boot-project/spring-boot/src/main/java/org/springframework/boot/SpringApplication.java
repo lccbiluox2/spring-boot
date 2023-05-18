@@ -545,6 +545,11 @@ public class SpringApplication {
 		}
 	}
 
+	/***
+	 * todo: 九师兄  2023/4/22 18:27
+	 *  https://www.javanorth.cn/2021/06/04/spring-boot-banner/
+	 *  你知道Spring Boot的彩蛋怎么设置吗？
+	 */
 	private Banner printBanner(ConfigurableEnvironment environment) {
 		if (this.bannerMode == Banner.Mode.OFF) {
 			return null;

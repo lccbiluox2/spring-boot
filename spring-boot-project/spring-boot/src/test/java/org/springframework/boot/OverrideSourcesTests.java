@@ -51,6 +51,12 @@ class OverrideSourcesTests {
 		assertThat(this.context.getBean(Service.class).bean.name).isEqualTo("foo");
 	}
 
+	/***
+	 * todo: 九师兄  2023/5/18 09:41
+	 *
+	 * 【Spring】spring.main.allow-bean-definition-overriding，允许Bean覆盖
+	 * https://blog.csdn.net/qq_21383435/article/details/125865110
+	 */
 	@Test
 	void primaryBeanInjectedProvingSourcesNotOverridden() {
 		this.context = SpringApplication.run(new Class<?>[] { MainConfiguration.class, TestConfiguration.class },
