@@ -31,6 +31,12 @@ import org.springframework.boot.diagnostics.FailureAnalysis;
  */
 class BeanDefinitionOverrideFailureAnalyzer extends AbstractFailureAnalyzer<BeanDefinitionOverrideException> {
 
+	/***
+	 * todo: 九师兄  2023/5/18 09:41
+	 *
+	 * 【Spring】spring.main.allow-bean-definition-overriding，允许Bean覆盖
+	 * https://blog.csdn.net/qq_21383435/article/details/125865110
+	 */
 	private static final String ACTION = "Consider renaming one of the beans or enabling "
 			+ "overriding by setting spring.main.allow-bean-definition-overriding=true";
 

@@ -22,6 +22,9 @@ package org.springframework.boot.diagnostics;
  *
  * @author Andy Wilkinson
  * @since 1.4.0
+ *
+ * 【Spring】Spring 故障分析器 FailureAnalyzer
+ * https://blog.csdn.net/qq_21383435/article/details/130308058
  */
 @FunctionalInterface
 public interface FailureAnalyzer {
