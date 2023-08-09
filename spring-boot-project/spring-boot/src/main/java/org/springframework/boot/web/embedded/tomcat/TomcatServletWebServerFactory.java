@@ -174,6 +174,7 @@ public class TomcatServletWebServerFactory extends AbstractServletWebServerFacto
 		if (this.disableMBeanRegistry) {
 			Registry.disableRegistry();
 		}
+		// todo: 2023/8/8 22:41 九师兄  todo: 创建tomcat
 		Tomcat tomcat = new Tomcat();
 		File baseDir = (this.baseDirectory != null) ? this.baseDirectory : createTempDir("tomcat");
 		tomcat.setBaseDir(baseDir.getAbsolutePath());
@@ -188,6 +189,7 @@ public class TomcatServletWebServerFactory extends AbstractServletWebServerFacto
 			tomcat.getService().addConnector(additionalConnector);
 		}
 		prepareContext(tomcat.getHost(), initializers);
+		// todo: 2023/8/8 22:41 九师兄  启动 tomcat
 		return getTomcatWebServer(tomcat);
 	}
 
