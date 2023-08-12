@@ -61,6 +61,7 @@ class OnClassCondition extends FilteringSpringBootCondition {
 
 	private ConditionOutcome[] resolveOutcomesThreaded(String[] autoConfigurationClasses,
 			AutoConfigurationMetadata autoConfigurationMetadata) {
+		// 多线程来加载类
 		int split = autoConfigurationClasses.length / 2;
 		OutcomesResolver firstHalfResolver = createOutcomesResolver(autoConfigurationClasses, 0, split,
 				autoConfigurationMetadata);
@@ -79,6 +80,7 @@ class OnClassCondition extends FilteringSpringBootCondition {
 		OutcomesResolver outcomesResolver = new StandardOutcomesResolver(autoConfigurationClasses, start, end,
 				autoConfigurationMetadata, getBeanClassLoader());
 		try {
+			// 创建线程
 			return new ThreadedOutcomesResolver(outcomesResolver);
 		}
 		catch (AccessControlException ex) {
@@ -147,6 +149,7 @@ class OnClassCondition extends FilteringSpringBootCondition {
 		private volatile ConditionOutcome[] outcomes;
 
 		private ThreadedOutcomesResolver(OutcomesResolver outcomesResolver) {
+			// 创建线程
 			this.thread = new Thread(() -> this.outcomes = outcomesResolver.resolveOutcomes());
 			this.thread.start();
 		}
@@ -154,6 +157,7 @@ class OnClassCondition extends FilteringSpringBootCondition {
 		@Override
 		public ConditionOutcome[] resolveOutcomes() {
 			try {
+				// 上面分成了2半 这里进行合并，合并两个线程的结果
 				this.thread.join();
 			}
 			catch (InterruptedException ex) {

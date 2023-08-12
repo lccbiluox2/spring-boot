@@ -68,6 +68,9 @@ import org.springframework.util.StringUtils;
  * @author Madhura Bhave
  * @since 1.3.0
  * @see EnableAutoConfiguration
+ *
+ * Spring Boot : Spring boot 的 AutoConfigurationImportSelector 自动配置原理
+ * https://blog.csdn.net/qq_21383435/article/details/105019814
  */
 public class AutoConfigurationImportSelector implements DeferredImportSelector, BeanClassLoaderAware,
 		ResourceLoaderAware, BeanFactoryAware, EnvironmentAware, Ordered {
@@ -88,6 +91,31 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 
 	private ResourceLoader resourceLoader;
 
+
+	/***
+	 * todo: 九师兄  2023/8/12 18:01
+	 *
+	 * Spring Boot : Spring boot 的 AutoConfigurationImportSelector 自动配置原理
+	 * https://blog.csdn.net/qq_21383435/article/details/105019814
+	 *
+	 * org.springframework.boot.autoconfigure.AutoConfigurationImportSelector 是
+	 * Spring Boot 自动配置的核心类之一，它实现了 ImportSelector 接口，用于选择需要导入的
+	 * 自动配置类。
+	 *
+	 * selectImports 方法是该类的核心方法，它定义了自动配置类的选择逻辑。具体分析该方法的源码如下：
+	 *
+	 * 该方法的逻辑比较清晰，下面我会分步解释每个步骤的作用：
+	 *
+	 * 1.isEnabled 方法用于检查是否启用自动配置。它会获取注解元数据中的 @EnableAutoConfiguration
+	 *   注解，并检查其中的属性值，判断是否启用自动配置。如果未启用自动配置，则直接返回空数组。
+	 * 2.AutoConfigurationMetadataLoader.loadMetadata 方法用于加载自动配置的元数据信息。
+	 * 3. 获取 AutoConfigurationEntry
+	 * 3.StringUtils.toStringArray 方法用于将最终的自动配置类列表转换为字符串数组并返回。
+	 *
+	 * 总结来说，org.springframework.boot.autoconfigure.AutoConfigurationImportSelector#selectImports 方法通过一系列的步骤，
+	 * 根据注解元数据和属性值，加载自动配置的元数据信息并选择需要导入的自动配置类。这些自动配置类
+	 * 将在应用启动时被自动导入，并应用于 Spring Boot 的自动化配置过程。
+	 */
 	@Override
 	public String[] selectImports(AnnotationMetadata annotationMetadata) {
 		if (!isEnabled(annotationMetadata)) {
@@ -95,6 +123,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 		}
 		AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader
 				.loadMetadata(this.beanClassLoader);
+		// 重点
 		AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(autoConfigurationMetadata,
 				annotationMetadata);
 		return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
@@ -112,12 +141,18 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 		if (!isEnabled(annotationMetadata)) {
 			return EMPTY_ENTRY;
 		}
+		// 方法用于获取注解元数据中的 @EnableAutoConfiguration 注解的属性值。
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
+		//  todo: 2023/8/12 18:03 九师兄 getCandidateConfigurations 方法用于获取所有的候选自动配置类。
+		//   它会根据传入的注解元数据和属性值，从 META-INF/spring.factories 中获取所有候选自动配置类的全限定名。
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+		// 方法用于去除重复的候选自动配置类。
 		configurations = removeDuplicates(configurations);
+		// 获取被主动排除的
 		Set<String> exclusions = getExclusions(annotationMetadata, attributes);
 		checkExcludedClasses(configurations, exclusions);
 		configurations.removeAll(exclusions);
+		// 过滤掉不需要的
 		configurations = filter(configurations, autoConfigurationMetadata);
 		fireAutoConfigurationImportEvents(configurations, exclusions);
 		return new AutoConfigurationEntry(configurations, exclusions);
@@ -168,6 +203,8 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 * @return a list of candidate configurations
 	 */
 	protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+		//  todo: 2023/8/12 18:06 九师兄 获取spring.factories 文件中的所有信息，然后在获取key= org.springframework.boot.autoconfigure.EnableAutoConfiguration
+		// 对应的values
 		List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
 				getBeanClassLoader());
 		Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
@@ -179,6 +216,8 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 * Return the class used by {@link SpringFactoriesLoader} to load configuration
 	 * candidates.
 	 * @return the factory class
+	 *
+	 * 这里在Springboot 中传递的就是 org.springframework.boot.autoconfigure.EnableAutoConfiguration
 	 */
 	protected Class<?> getSpringFactoriesLoaderFactoryClass() {
 		return EnableAutoConfiguration.class;
@@ -243,6 +282,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 		boolean skipped = false;
 		for (AutoConfigurationImportFilter filter : getAutoConfigurationImportFilters()) {
 			invokeAwareMethods(filter);
+			// Spring 内置优化
 			boolean[] match = filter.match(candidates, autoConfigurationMetadata);
 			for (int i = 0; i < match.length; i++) {
 				if (!match[i]) {
