@@ -43,6 +43,7 @@ class SpringApplicationRunListeners {
 	}
 
 	void starting() {
+		// 循环调用发布
 		for (SpringApplicationRunListener listener : this.listeners) {
 			listener.starting();
 		}

@@ -84,6 +84,13 @@ public abstract class SpringBootServletInitializer implements WebApplicationInit
 		this.registerErrorPageFilter = registerErrorPageFilter;
 	}
 
+	/***
+	 * todo: 九师兄  2023/8/12 22:34
+	 *
+	 * 【Spring】Spring 外置 tomcat 启动原理
+	 * https://blog.csdn.net/qq_21383435/article/details/132254559
+	 *
+	 */
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		// Logger initialization is deferred in case an ordered
@@ -106,20 +113,38 @@ public abstract class SpringBootServletInitializer implements WebApplicationInit
 		}
 	}
 
+	/***
+	 * todo: 九师兄  2023/8/12 22:41
+	 *
+	 * createRootApplicationContext 方法是 Spring Boot Servlet 初始化器的一个关键方法。它是在使用 Servlet
+	 * 容器启动 Spring Boot 应用程序时，初始化根应用程序上下文的入口点。
+	 *
+	 */
 	protected WebApplicationContext createRootApplicationContext(ServletContext servletContext) {
+		// 这里创建了 SpringApplication
 		SpringApplicationBuilder builder = createSpringApplicationBuilder();
+		// 设置spring boot要运行的主方法
 		builder.main(getClass());
+		// 获取已存在的根Web应用程序上下文（如果有）。
 		ApplicationContext parent = getExistingRootWebApplicationContext(servletContext);
 		if (parent != null) {
+			// 如果已存在根上下文，将其设置为父上下文，并清除ServletContext中的已存在上下文属性。
 			this.logger.info("Root context already created (using as parent).");
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, null);
 			builder.initializers(new ParentContextApplicationContextInitializer(parent));
 		}
+		// 添加ServletContext的ApplicationContext初始化器
 		builder.initializers(new ServletContextApplicationContextInitializer(servletContext));
+		// 设置使用注解配置的ServletWebServer应用程序上下文。
 		builder.contextClass(AnnotationConfigServletWebServerApplicationContext.class);
+		// 调用可能由子类重写的配置方法。
 		builder = configure(builder);
+		// 添加处理Web环境属性的初始化监听器。
 		builder.listeners(new WebEnvironmentPropertySourceInitializer(servletContext));
+		// 使用构建器创建SpringApplication实例。
 		SpringApplication application = builder.build();
+		// 检查是否没有定义任何SpringApplication的来源（sources）。如果没有任何来源，并且当前类上存在
+		// @Configuration注解，则将当前类设置为主要来源。
 		if (application.getAllSources().isEmpty()
 				&& MergedAnnotations.from(getClass(), SearchStrategy.TYPE_HIERARCHY).isPresent(Configuration.class)) {
 			application.addPrimarySources(Collections.singleton(getClass()));
@@ -128,9 +153,11 @@ public abstract class SpringBootServletInitializer implements WebApplicationInit
 				"No SpringApplication sources have been defined. Either override the "
 						+ "configure method or add an @Configuration annotation");
 		// Ensure error pages are registered
+		// 如果没有任何来源被定义，则抛出异常
 		if (this.registerErrorPageFilter) {
 			application.addPrimarySources(Collections.singleton(ErrorPageFilterConfiguration.class));
 		}
+		// 运行SpringApplication并返回WebApplicationContext对象。
 		return run(application);
 	}
 
@@ -142,6 +169,7 @@ public abstract class SpringBootServletInitializer implements WebApplicationInit
 	 * @since 1.3.0
 	 */
 	protected SpringApplicationBuilder createSpringApplicationBuilder() {
+		// 这里创建了 SpringApplication
 		return new SpringApplicationBuilder();
 	}
 
@@ -154,7 +182,27 @@ public abstract class SpringBootServletInitializer implements WebApplicationInit
 		return (WebApplicationContext) application.run();
 	}
 
+	/***
+	 * todo: 九师兄  2023/8/12 22:47
+	 *
+	 * getExistingRootWebApplicationContext的作用是获取已存在的根Web应用程序上下文。
+	 *
+	 * 在Spring Boot中，通过SpringBootServletInitializer类来支持将Spring Boot应用程序部署到Servlet容器中
+	 * （如Tomcat、Jetty等）。当部署到Servlet容器中时，Servlet容器会初始化应用程序，并创建一个Web应用程序上下文
+	 * （WebApplicationContext）。
+	 *
+	 * getExistingRootWebApplicationContext方法用于检查是否已经存在根Web应用程序上下文。如果存在，则返回已存在
+	 * 的上下文对象。这通常发生在应用程序启动后通过其他方式（如XML配置文件、Java配置类等）创建了根上下文。
+	 *
+	 * 如果存在根上下文，SpringBootServletInitializer会将其设置为新创建的SpringApplicationBuilder实例的父上
+	 * 下文。这样可以实现Spring Boot应用程序与已有的上下文进行集成。
+	 *
+	 * 总结而言，getExistingRootWebApplicationContext方法的作用是获取已存在的根Web应用程序上下文，以便在Servlet
+	 * 容器中部署Spring Boot应用程序时能够与已有的上下文进行集成。
+	 */
 	private ApplicationContext getExistingRootWebApplicationContext(ServletContext servletContext) {
+		// ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE是用于将根WebApplicationContext绑定到属性上的常量，在成功
+		// 启动时使用，并提供了方便查找根上下文的方法。
 		Object context = servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (context instanceof ApplicationContext) {
 			return (ApplicationContext) context;

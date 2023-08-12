@@ -90,6 +90,7 @@ public class SpringApplicationBuilder {
 	private boolean configuredAsChild = false;
 
 	public SpringApplicationBuilder(Class<?>... sources) {
+		// 这里创建了 SpringApplication
 		this.application = createSpringApplication(sources);
 	}
 

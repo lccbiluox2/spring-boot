@@ -262,6 +262,30 @@ public class SpringApplication {
 	 * @param primarySources the primary bean sources
 	 * @see #run(Class, String[])
 	 * @see #setSources(Set)
+	 *
+	 * org.springframework.boot.SpringApplication类的构造方法SpringApplication(org.springframework.core.io.ResourceLoader, java.lang.Class<?>...)
+	 * 用于创建一个新的SpringApplication对象，并指定自定义的ResourceLoader和要加载的主配置类。
+	 *
+	 * 在构造方法中，首先会对传入的primarySources进行校验，确保不为null。然后，将primarySources转换为
+	 * LinkedHashSet，保持原始顺序，并存储到this.primarySources中。
+	 *
+	 * 接下来，通过调用deduceFromClasspath()方法，推断应用程序的Web应用类型。Spring Boot
+	 * 根据类路径和默认值进行推断，将结果存储到this.webApplicationType中。
+	 *
+	 * 之后，通过调用getSpringFactoriesInstances()方法，获取ApplicationContextInitializer和
+	 * ApplicationListener的实例。这些实例是通过SPI（Service Provider Interface）机制，
+	 * 从META-INF/spring.factories文件中加载的。
+	 *
+	 * 最后，调用deduceMainApplicationClass()方法，推断主应用程序类。它通过反射查找main方法所在的类，
+	 * 并将结果存储到this.mainApplicationClass中。
+	 *
+	 * 总结来说，SpringApplication的这个构造方法主要做了以下几件事情：
+	 *
+	 * 1. 存储传入的主配置类集合primarySources，并确保它不为null。
+	 * 2. 推断应用程序的Web应用类型。
+	 * 3. 加载并存储ApplicationContextInitializer和ApplicationListener的实例。
+	 * 4. 推断主应用程序类。
+	 * 这些准备工作为后续的应用程序启动提供了必要的准备和配置信息。
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
@@ -294,6 +318,29 @@ public class SpringApplication {
 	 * {@link ApplicationContext}.
 	 * @param args the application arguments (usually passed from a Java main method)
 	 * @return a running {@link ApplicationContext}
+	 *
+	 * 1. 创建一个StopWatch对象，用于记录应用程序启动的时间。
+	 * 2. 初始化ConfigurableApplicationContext和SpringBootExceptionReporter的集合。
+	 * 3. 配置Headless模式属性。
+	 * 4. 获取并初始化SpringApplicationRunListeners，它负责管理Spring Boot的运行时事件。
+	 * 5. 发布starting事件，通知所有监听器应用程序即将启动。
+	 * 6. 创建ApplicationArguments，用于处理命令行参数。
+	 * 7. 准备应用程序环境，包括加载配置文件、解析占位符等。这个过程会调用environmentPrepared事件通知。
+	 * 8. 配置忽略的Bean信息。
+	 * 9. 打印启动时的Banner。
+	 * 10. 创建应用程序上下文。
+	 * 11. 获取SpringBootExceptionReporter的实例，用于处理异常报告。
+	 * 12. 准备应用程序上下文，包括调用contextPrepared和contextLoaded事件通知。
+	 * 13. 刷新应用程序上下文，加载Bean并启动生命周期。
+	 * 14. 刷新之后的处理，包括调用afterRefresh事件通知。
+	 * 15. 停止计时器并根据配置打印应用程序启动信息。
+	 * 16. 发布started事件，通知所有监听器应用程序已经启动。
+	 * 17. 调用应用程序的CommandLineRunner和ApplicationRunner，执行自定义逻辑。
+	 * 18. 返回配置后的应用程序上下文。
+	 *
+	 * 总结来说，run方法是Spring Boot应用程序的核心入口点，它负责处理应用程序的启动过程，包括创建上下文、
+	 * 准备环境、加载Bean等操作，并通知相关的事件监听器。最终返回一个可配置的应用程序上下文，供应用程序
+	 * 进行后续操作。
 	 */
 	public ConfigurableApplicationContext run(String... args) {
 		StopWatch stopWatch = new StopWatch();
@@ -303,13 +350,14 @@ public class SpringApplication {
 		configureHeadlessProperty();
 		// 加载所有 SpringApplicationRunListener 的实现类
 		SpringApplicationRunListeners listeners = getRunListeners(args);
-		// 调用了 starting
+		// 发布 Spring Boot 启动事件
 		listeners.starting();
 		try {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
 			// 调用了 environmentPrepared
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
+			// 打印 Banner
 			Banner printedBanner = printBanner(environment);
 			context = createApplicationContext();
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
@@ -622,6 +670,7 @@ public class SpringApplication {
 			try {
 				switch (this.webApplicationType) {
 				case SERVLET:
+					// 根据不同的类型 创建不同的服务器
 					contextClass = Class.forName(DEFAULT_SERVLET_WEB_CONTEXT_CLASS);
 					break;
 				case REACTIVE:
