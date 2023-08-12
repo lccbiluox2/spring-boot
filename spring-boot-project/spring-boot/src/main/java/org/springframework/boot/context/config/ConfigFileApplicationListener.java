@@ -101,6 +101,12 @@ import org.springframework.util.StringUtils;
  * @author Eddú Meléndez
  * @author Madhura Bhave
  * @since 1.0.0
+ *
+ * 【Spring】Spring boot 读取配置文件的原理是什么？
+ * https://blog.csdn.net/qq_21383435/article/details/132254986
+ *
+ * 【Spring】扩展点EnvironmentPostProcessor实例详解
+ * https://blog.csdn.net/qq_21383435/article/details/132030932
  */
 public class ConfigFileApplicationListener implements EnvironmentPostProcessor, SmartApplicationListener, Ordered {
 
@@ -170,9 +176,16 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 				|| ApplicationPreparedEvent.class.isAssignableFrom(eventType);
 	}
 
+	/***
+	 * todo: 九师兄  2023/8/12 23:17
+	 *
+	 * 【Spring】Spring boot 读取配置文件的原理是什么？
+	 * https://blog.csdn.net/qq_21383435/article/details/132254986
+	 */
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof ApplicationEnvironmentPreparedEvent) {
+			//  todo: 2023/8/12 九师兄 重点
 			onApplicationEnvironmentPreparedEvent((ApplicationEnvironmentPreparedEvent) event);
 		}
 		if (event instanceof ApplicationPreparedEvent) {
@@ -181,10 +194,20 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 	}
 
 	private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
+		// 获取我们所有的 EnvironmentPostProcessor
 		List<EnvironmentPostProcessor> postProcessors = loadPostProcessors();
 		postProcessors.add(this);
+		// 然后进行排序
 		AnnotationAwareOrderComparator.sort(postProcessors);
+		// 然后调用 EnvironmentPostProcessor 的 postProcessEnvironment 方法
 		for (EnvironmentPostProcessor postProcessor : postProcessors) {
+			/***
+			 * todo: 九师兄  2023/8/12 23:16
+			 * 【Spring】扩展点EnvironmentPostProcessor实例详解
+			 *  https://blog.csdn.net/qq_21383435/article/details/132030932
+			 *
+			 * 这里就无缝衔接上我们的上一个文章了
+			 */
 			postProcessor.postProcessEnvironment(event.getEnvironment(), event.getSpringApplication());
 		}
 	}

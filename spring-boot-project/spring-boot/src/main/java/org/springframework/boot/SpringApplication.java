@@ -414,6 +414,8 @@ public class SpringApplication {
 	 * classpath:config目录下的application.properties或application.yml
 	 * file:./config目录下的application.properties或application.yml
 	 *
+	 * 【Spring】Spring boot 读取配置文件的原理是什么？
+	 * https://blog.csdn.net/qq_21383435/article/details/132254986
 	 */
 	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments) {
@@ -421,6 +423,7 @@ public class SpringApplication {
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
 		ConfigurationPropertySources.attach(environment);
+		//  todo: 2023/8/12 九师兄 重点方法
 		listeners.environmentPrepared(environment);
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
