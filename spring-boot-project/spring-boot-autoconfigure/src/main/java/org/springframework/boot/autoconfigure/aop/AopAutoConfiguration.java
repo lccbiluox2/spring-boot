@@ -40,11 +40,21 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
  * @author Josh Long
  * @since 1.0.0
  * @see EnableAspectJAutoProxy
+ *
+ *
+ * 【Spring】Spring的Controller为什么会被CGLB代理
+ * https://blog.csdn.net/qq_21383435/article/details/132099921
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = "spring.aop", name = "auto", havingValue = "true", matchIfMissing = true)
 public class AopAutoConfiguration {
 
+	/***
+	 * todo: 九师兄  2023/8/13 09:44
+	 *
+	 * 【Spring】Spring的Controller为什么会被CGLB代理
+	 * https://blog.csdn.net/qq_21383435/article/details/132099921
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(Advice.class)
 	static class AspectJAutoProxyingConfiguration {
