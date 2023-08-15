@@ -327,13 +327,16 @@ public class SpringApplication {
 		//设置系统属性 java.awt.headless 为 true（没有图形化界面）
 		configureHeadlessProperty();
 
+		// 加载所有 SpringApplicationRunListener 的实现类
 		// 4、创建所有 Spring 运行监听器并发出开始执行的事件
 		SpringApplicationRunListeners listeners = getRunListeners(args);
+		// 调用了 starting
 		listeners.starting();
 		try {
 			// 5、初始化默认应用参数类
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
 
+			// 调用了 environmentPrepared
 			// 6、根据SpringApplicationRunListeners和应用参数来准备 Spring 环境
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
@@ -348,6 +351,7 @@ public class SpringApplication {
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
 
+			// 内部调用了 contextPrepared、contextLoaded
 			// 10、Spring上下文前置处理
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 
@@ -363,6 +367,7 @@ public class SpringApplication {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
 
+			// 调用了 started
 			// 15、发布应用上下文启动完成事件
 			listeners.started(context);
 
@@ -370,6 +375,7 @@ public class SpringApplication {
 			callRunners(context, applicationArguments);
 		}
 		catch (Throwable ex) {
+			// 内部调用了 failed
 			handleRunFailure(context, ex, exceptionReporters, listeners);
 			throw new IllegalStateException(ex);
 		}
@@ -386,6 +392,30 @@ public class SpringApplication {
 		return context;
 	}
 
+	/***
+	 * todo: 九师兄  2023/5/19 19:32
+	 *
+	 * 在web环境下共初始化了以下4个属性来源:
+	 *
+	 * System.getProperties()
+	 * System.getenv()
+	 * servlet-context-init-params
+	 * servlet-config-init-params
+	 *
+	 * 有意思的问题：此时servlet-context-init-params和servlet-config-init-params
+	 * 实际上是一个占位符，无法从这两个来源获得任何真实的属性，等到refresh方法执行时才会被
+	 * 真实的来源替换。
+	 *
+	 * 配置文件加载
+	 * 监听器ConfigFileApplicationListener负责spring-boot配置文件的加载，
+	 * ConfigFileApplicationListener默认会从以下的位置搜索配置文件:
+	 *
+	 * classpath下的application.properties或application.yml
+	 * file:./下的application.properties或application.yml
+	 * classpath:config目录下的application.properties或application.yml
+	 * file:./config目录下的application.properties或application.yml
+	 *
+	 */
 	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments) {
 		// Create and configure the environment
@@ -477,6 +507,21 @@ public class SpringApplication {
 				System.getProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS, Boolean.toString(this.headless)));
 	}
 
+	/***
+	 * todo: 九师兄  2023/5/28 15:25
+	 *
+	 * run 方法中 getRunListeners(args) 通过 SpringFactoriesLoader 加载 classpath
+	 * 下 META-INF/spring.factotries 中配置的所有 SpringApplicationRunListener 的实现类，
+	 * 通过反射实例化后，存到局部变量 listeners 中，其类型为 SpringApplicationRunListeners；
+	 *
+	 * 然后在 run 方法不同阶段通过调用 listeners 的不同阶段方法来触发 SpringApplicationRunListener
+	 * 所有实现类的阶段方法调用。
+	 *
+	 * 因此，只要编写一个 SpringApplicationRunListener 的自定义实现类，在实现接口不同阶段方法
+	 * 时，打印当前时间；并在 META-INF/spring.factotries 中配置该类后，该类也会实例化，存到
+	 * listeners 中；在不同阶段结束时打印结束时间，以此来评估不同阶段的执行耗时。 在项目中添加
+	 * 实现类 MySpringApplicationRunListener ：
+	 */
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
 		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
 		return new SpringApplicationRunListeners(logger,
@@ -612,6 +657,11 @@ public class SpringApplication {
 		}
 	}
 
+	/***
+	 * todo: 九师兄  2023/4/22 18:27
+	 *  https://www.javanorth.cn/2021/06/04/spring-boot-banner/
+	 *  你知道Spring Boot的彩蛋怎么设置吗？
+	 */
 	private Banner printBanner(ConfigurableEnvironment environment) {
 		if (this.bannerMode == Banner.Mode.OFF) {
 			return null;
