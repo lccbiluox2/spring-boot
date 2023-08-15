@@ -42,6 +42,12 @@ import org.springframework.util.ErrorHandler;
  * @author Andy Wilkinson
  * @author Artsiom Yudovin
  * @since 1.0.0
+ *
+ * 目前，SpringBoot 中自带的 SpringApplicationRunListener 接口只有一个实现类：
+ * EventPublishingRunListener，该实现类作用：通过观察者模式的事件机制，在 run 方法
+ * 的不同阶段触发 Event 事件，ApplicationListener 的实现类们通过监听不同的 Event
+ * 事件对象触发不同的业务处理逻辑。
+ *
  */
 public class EventPublishingRunListener implements SpringApplicationRunListener, Ordered {
 

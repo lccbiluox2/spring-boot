@@ -62,6 +62,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 class ServletWebServerFactoryConfiguration {
 
+	/**
+	 * todo: 2023/8/8 22:08 九师兄
+	 *
+	 * @Configuration(proxyBeanMethods = false): 表示这是一个配置类，并且不使用代理
+	 * 		代理Bean方法。配置类用于定义和配置应用程序中的Bean。
+	 * @ConditionalOnClass({ Servlet.class, Tomcat.class, UpgradeProtocol.class }):
+	 * 		表示只有在类路径中存在 javax.servlet.Servlet、org.apache.catalina.startup.Tomcat
+	 * 		和 org.apache.coyote.http11.upgrade.UpgradeProtocol 类时，该配置才会生效。
+	 * 		这些类通常与Tomcat服务器容器相关。
+	 *
+	 * @ConditionalOnMissingBean(value = ServletWebServerFactory.class, search
+	 * 	= SearchStrategy.CURRENT): 表示只有在当前上下文中不存在 ServletWebServerFactory
+	 * 	类型的Bean时，该配置才会生效。ServletWebServerFactory 是用于创建Servlet容器的工厂类。
+	 *
+	 * 因此，EmbeddedTomcat 配置类在满足条件的情况下，会自动配置一个嵌入式的 Tomcat 服务器，
+	 * 用于处理 Servlet 相关的请求和协议升级。这样，如果应用程序中没有手动配置过 ServletWebServerFactory
+	 * 类型的Bean，就会使用嵌入式的 Tomcat 作为默认的Servlet容器。这样可以简化应用程序的部署和配置过程。
+	 **/
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ Servlet.class, Tomcat.class, UpgradeProtocol.class })
 	@ConditionalOnMissingBean(value = ServletWebServerFactory.class, search = SearchStrategy.CURRENT)

@@ -176,7 +176,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+			// todo: 重点 获取 ServletWebServerFactory
 			ServletWebServerFactory factory = getWebServerFactory();
+			// todo: 2023/8/8 22:35 九师兄  重点 调用了 getWebServer 方法
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
 		else if (servletContext != null) {
