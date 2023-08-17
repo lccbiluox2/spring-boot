@@ -453,6 +453,7 @@ public class SpringApplication {
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
+			// 打印日志的位置
 			logStartupProfileInfo(context);
 		}
 		// Add boot specific singleton beans

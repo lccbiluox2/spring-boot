@@ -46,7 +46,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
  * https://blog.csdn.net/qq_21383435/article/details/132099921
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = "spring.aop", name = "auto", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "spriaop", name = "auto", havingValue = "true", matchIfMissing = true)
 public class AopAutoConfiguration {
 
 	/***

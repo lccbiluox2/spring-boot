@@ -181,6 +181,9 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 	 *
 	 * 【Spring】Spring boot 读取配置文件的原理是什么？
 	 * https://blog.csdn.net/qq_21383435/article/details/132254986
+	 *
+	 * 【Spring】Spring的ApplicationEnvironmentPreparedEvent事件、环境准备事件
+	 *  https://blog.csdn.net/qq_21383435/article/details/132327059
 	 */
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
