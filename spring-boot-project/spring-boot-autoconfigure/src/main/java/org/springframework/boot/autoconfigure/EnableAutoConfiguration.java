@@ -74,6 +74,9 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * @see ConditionalOnClass
  * @see AutoConfigureAfter
  * @see SpringBootApplication
+ *
+ * 【Spring】Spring Boot 手动配置 @Enable 的秘密
+ * https://blog.csdn.net/qq_21383435/article/details/131583434
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
