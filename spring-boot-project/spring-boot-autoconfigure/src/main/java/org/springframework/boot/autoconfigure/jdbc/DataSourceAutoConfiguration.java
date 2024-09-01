@@ -56,6 +56,7 @@ public class DataSourceAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(EmbeddedDatabaseCondition.class)
+	// 这个class在加载数据库连接池的顺序非常的重要
 	@ConditionalOnMissingBean({ DataSource.class, XADataSource.class })
 	@Import(EmbeddedDataSourceConfiguration.class)
 	protected static class EmbeddedDatabaseConfiguration {
@@ -63,6 +64,7 @@ public class DataSourceAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	// 这个重要
 	@Conditional(PooledDataSourceCondition.class)
 	@ConditionalOnMissingBean({ DataSource.class, XADataSource.class })
 	@Import({ DataSourceConfiguration.Hikari.class, DataSourceConfiguration.Tomcat.class,
@@ -102,6 +104,7 @@ public class DataSourceAutoConfiguration {
 		@Override
 		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			ConditionMessage.Builder message = ConditionMessage.forCondition("PooledDataSource");
+			// 加载资源文件
 			if (DataSourceBuilder.findType(context.getClassLoader()) != null) {
 				return ConditionOutcome.match(message.foundExactly("supported DataSource"));
 			}

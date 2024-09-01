@@ -46,8 +46,11 @@ import org.springframework.util.ClassUtils;
  */
 public final class DataSourceBuilder<T extends DataSource> {
 
-	private static final String[] DATA_SOURCE_TYPE_NAMES = new String[] { "com.zaxxer.hikari.HikariDataSource",
-			"org.apache.tomcat.jdbc.pool.DataSource", "org.apache.commons.dbcp2.BasicDataSource" };
+	// 这里就体现了 连接池的优先级
+	private static final String[] DATA_SOURCE_TYPE_NAMES = new String[] {
+			"com.zaxxer.hikari.HikariDataSource",
+			"org.apache.tomcat.jdbc.pool.DataSource",
+			"org.apache.commons.dbcp2.BasicDataSource" };
 
 	private Class<? extends DataSource> type;
 
@@ -121,6 +124,7 @@ public final class DataSourceBuilder<T extends DataSource> {
 
 	@SuppressWarnings("unchecked")
 	public static Class<? extends DataSource> findType(ClassLoader classLoader) {
+		// 关键信息 DATA_SOURCE_TYPE_NAMES
 		for (String name : DATA_SOURCE_TYPE_NAMES) {
 			try {
 				return (Class<? extends DataSource>) ClassUtils.forName(name, classLoader);
